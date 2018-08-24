@@ -43,6 +43,18 @@ var suggestions = writeGood('So the cat was stolen', { passive: false});
 // suggestions: []
 ```
 
+You can use the second argument's `checks` property to pass in custom checks instead of `write-good`'s default linting configuration.
+Like this, you can check non-English documents, for example with the linter extension for German, [schreib-gut](https://github.com/TimKam/schreib-gut):
+
+
+```javascript
+var schreibGut = require('schreib-gut');
+
+writeGood('Aller Wahrscheinlichkeit nach können Entwickler nicht gut schreiben', { weasel-words: false, checks: schreibGut});
+
+// suggestions
+// [{index : 0, offset : 29, reason : '"Aller Wahrscheinlichkeit nach" is wordy or unneeded' }]
+```
 
 ## CLI
 
@@ -80,6 +92,52 @@ Or exclude checks like this:
 write-good *.md --no-passive
 ```
 
+Or include checks like this:
+
+```shell
+# E-Prime is disabled by default.
+write-good *.md --yes-eprime
+```
+
+**Note:** The ``--yes`` prefix only works for *E-Prime*, because the other checks are included by default, anyway.
+
+You can run just with text without supplying files:
+
+```shell
+write-good --text="It should have been defined there."
+```
+
+You can even supply multi-line text:
+
+```shell
+write-good --text="I can't see a problem there that's not been defined yet.
+Should be defined again."
+```
+
+You can also pass other arguments:
+
+```shell
+write-good --text="It should have been defined there." --no-passive
+```
+
+You can even fetch output from a remote file:
+
+```shell
+write-good --text="$(curl https://raw.githubusercontent.com/btford/write-good/master/README.md)"
+```
+
+Use the ``--parse`` option to activate parse-happy output and a more conventional Unix exit code:
+
+```shell
+write-good *.md --parse
+```
+
+To specify a custom checks extension, for example [schreib-gut](https://github.com/TimKam/schreib-gut), run:
+
+```shell
+npm install -g schreib-gut
+write-good *.md --checks=schreib-gut
+```
 
 ## Checks
 
@@ -109,6 +167,84 @@ Checks for wordy phrases and unnecessary words.
 ### `cliches`
 Checks for common cliches.
 
+### `eprime`
+Checks for ["to-be"](https://en.wikipedia.org/wiki/E-Prime) verbs. _Disabled by default_
+
+## Extensions
+Users can create their own `write-good` language checks. As described above,
+you can specify such extensions when running `write-good` on the command line
+or calling it in your JavaScript code.
+
+The following 3rd-party `write-good` extensions are available:
+
+* [schreib-gut](https://github.com/timkam/schreib-gut): A basic extension for
+  the German language
+
+If you know of any `write-good` extensions that are not in this list, please open a pull request!
+
+### Interface
+An extension is a Node.js module that exposes an object containing a check
+function (``fn``) and an ``explanation`` string for each new check:
+
+```javascript
+module.exports = {
+  check1: {
+    fn: function(text) {
+      …
+    },
+    explanation: '…'
+  },
+  check2: {
+    fn: function(text) {
+      …
+    },
+    explanation: '…'
+  }
+}
+```
+
+Each check function takes a string input and determines a list of style
+violation objects, each with an ``index`` and an ``offset``:
+
+```javascript
+/**
+* @param {text} text  Input text
+* @return {{index:number, offset:number}[]}  List of all violations
+*/
+```
+
+The ``index`` defines the position of the match in the input text, whereas the
+``offset`` specifies the length of the match.
+
+The following example extension provides a check that determines if the input
+text contains a set of forbidden terms (*Tom Riddle* and *Voldemort*):
+
+```javascript
+module.exports = {
+  voldemort: {
+    fn: function (text) {
+      var positives = ['Tom Riddle', 'Voldemort']
+      var re = new RegExp('\\b(' + positives.join('|') + ')\\b', 'gi');
+      var suggestions = [];
+      while (match = re.exec(text)) {
+        suggestions.push({
+          index: match.index,
+          offset: match[0].length,
+        });
+      }
+      return suggestions;
+    },
+    explanation: 'You must not name Him-Who-Must-Not-Be-Named'
+  }
+}
+```
+
+## Docker
+
+You can also run this application in [Docker](https://www.docker.com). For example:
+
+`docker run -it --rm "$(pwd)":/srv/app -w /srv/app btford/write-good:latest *.md`
+
 ## See also
 
 I came across these resources while doing research to make this module.
@@ -122,7 +258,6 @@ They might be helpful.
 * [natural](https://github.com/NaturalNode/natural) – general purpose NLP toolkit in JavaScript
 * [WordNet](http://wordnet.princeton.edu/) – lexical database of the English language
 * [LanguageTool](https://languagetool.org/) – style and grammar checker implemented in Java
-* [linter-write-good](https://github.com/gepoch/linter-write-good) for [Atom](https://atom.io/)
 
 ### Prose
 
@@ -138,6 +273,14 @@ These apps have similar functionality that you may find useful.
 
 * [Hemingway App](http://www.hemingwayapp.com/)
 * [Nitpicker](http://nitpickertool.com)
+* [Grammarly](https://app.grammarly.com)
+
+## Other projects using write good
+
+* [linter-write-good](https://github.com/gepoch/linter-write-good) for [Atom](https://atom.io/)
+* [Write Good action](https://drafts4-actions.agiletortoise.com/a/2D7) for [Drafts](http://agiletortoise.com/drafts/index.html) iOS App
+* [Write Good Linter](https://marketplace.visualstudio.com/items?itemName=travisthetechie.write-good-linter) for [Visual Studio Code](https://code.visualstudio.com)
+* [Vim ALE](https://github.com/w0rp/ale) realtime linter for [Vim](http://www.vim.org/) with included support for write-good.
 
 ## License
 MIT

@@ -10,7 +10,7 @@ describe('writeGood', function () {
 
   it('should detect passive voice', function () {
     expect(writeGood('The script was killed')).toEqual([
-      { index: 11, offset: 10, reason: '"was killed" is passive voice' }
+      { index: 11, offset: 10, reason: '"was killed" may be passive voice' }
     ]);
   });
 
@@ -99,7 +99,7 @@ describe('writeGood', function () {
 
   it('should order suggestions by index', function () {
     expect(writeGood('It has been said that few developers write well.')).toEqual([
-      { index: 7, offset: 9, reason: '"been said" is passive voice' },
+      { index: 7, offset: 9, reason: '"been said" may be passive voice' },
       { index: 22, offset: 3, reason: '"few" is a weasel word' }
     ]);
   });
@@ -136,6 +136,26 @@ describe('writeGood', function () {
     expect(writeGood('\n\nthere is unnecessary verbiage.')).toEqual([
       { index: 2, offset: 8, reason: '"there is" is unnecessary verbiage' }
     ]);
+  });
+
+  it('should detect simple "to be" verb', function () {
+    expect(writeGood('NodeJs is awesome ;)', { eprime: true })).toEqual([
+      { index: 7, offset: 2, reason: '"is" is a form of \'to be\'' }
+    ]);
+  });
+
+  it('should ignore "to be" verb with check disabled', function () {
+    expect(writeGood('NodeJs is awesome ;)', { eprime: false })).toEqual([]);
+  });
+
+  it('should detect "to be" verb contraction', function () {
+    expect(writeGood('There\'s no place like localhost', { eprime: true })).toEqual([
+      { index: 0, offset: 7, reason: '"There\'s" is a form of \'to be\'' }
+    ]);
+  });
+
+  it('shouldn\'t flag words starting with "is" as an error', function () {
+    expect(writeGood('Isle of Man', { eprime: true })).toEqual([]);
   });
 });
 

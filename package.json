@@ -1,6 +1,6 @@
 {
   "name": "write-good",
-  "version": "0.9.1",
+  "version": "0.13.1",
   "description": "Naive linter for English prose",
   "main": "write-good.js",
   "repository": {
@@ -8,7 +8,8 @@
     "url": "https://github.com/btford/write-good.git"
   },
   "bin": {
-    "write-good": "bin/write-good.js"
+    "write-good": "bin/write-good.js",
+    "writegood": "bin/write-good.js"
   },
   "directories": {
     "test": "test"
@@ -25,13 +26,21 @@
   "author": "Brian Ford",
   "license": "MIT",
   "devDependencies": {
-    "jasmine-node": "2.0.0"
+    "jasmine-node": "2.0.0",
+    "schreib-gut": "0.0.1"
   },
   "dependencies": {
-    "passive-voice": "~0.0.0",
-    "weasel-words": "~0.1.0",
-    "adverb-where": "~0.0.0",
-    "too-wordy": "~0.1.0",
-    "no-cliches": "~0.1.0"
-  }
+    "adverb-where": "0.0.9",
+    "commander": "^2.12.2",
+    "e-prime": "^0.10.2",
+    "no-cliches": "^0.1.0",
+    "object.assign": "^4.0.4",
+    "passive-voice": "^0.1.0",
+    "too-wordy": "^0.1.4",
+    "weasel-words": "^0.1.1"
+  },
+  "coordinates": [
+    45.51921480000001,
+    -73.5789434
+  ]
 }
